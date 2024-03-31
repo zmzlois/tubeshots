@@ -1,11 +1,15 @@
 import { NextRequest, NextResponse } from "next/server";
 import puppeteer from "puppeteer"
+import { UTApi } from "uploadthing/server"
 
 const time = 300
+
+// https://vimeo.com/325644669
 export async function GET(req: Request, res: Response) {
   const { searchParams } = new URL(req.url);
   const url = searchParams.get("url");
-
+  const videoId = url?.split("/").pop()
+  console.log("Video ID", videoId)
 
 
   if (!url) {
@@ -88,4 +92,10 @@ export async function GET(req: Request, res: Response) {
     }
   }
 
+}
+
+
+function uploadFile(file: string, id: number, index: number) {
+
+  const utapi = new UTApi();
 }
