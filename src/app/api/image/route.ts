@@ -1,8 +1,14 @@
+import { env } from "@/lib/env";
 import { NextRequest, NextResponse } from "next/server";
 import puppeteer from "puppeteer"
-import { UTApi } from "uploadthing/server"
+import { UTApi, createRouteHandler, UTFile } from "uploadthing/server"
+import { FileEsque, UploadFileResult, UploadFilesOptions } from "uploadthing/types";
+import { utapi } from "@/server/uploadthing";
+import { uptime } from "process";
 
 const time = 300
+
+const delay = (ms: any) => new Promise(res => setTimeout(res, ms));
 
 // https://vimeo.com/325644669
 export async function GET(req: Request, res: Response) {
@@ -23,7 +29,8 @@ export async function GET(req: Request, res: Response) {
 
   try {
     browser = await puppeteer.launch({
-      headless: false, args: [
+      headless: true,
+      args: [
         "--start-fullscreen",
       ]
     });
@@ -36,13 +43,20 @@ export async function GET(req: Request, res: Response) {
 
     //if (closeButton) await closeButton.click()
 
-    const fullScreen = await page.$("button[data-enter-fullscreen='true']")
+    // const fullScreen = await page.$("button[data-enter-fullscreen='true']")
 
-    if (fullScreen) await fullScreen.click()
+    //if (fullScreen) await fullScreen.click()
 
-    const playButton = await page.$('button[aria-label="Play"]')
+    const playButton = await page.waitForSelector('button[aria-label="Play"]')
     // click on the play button
-    if (playButton) playButton.click()
+    if (!playButton) { console.log("Play button not found") }
+
+    if (playButton) {
+      await playButton.click()
+      console.log("Play button clicked")
+    }
+
+    await page.mouse.move(-300, 0)
 
     const video = await page.waitForSelector("video")
 
@@ -58,10 +72,20 @@ export async function GET(req: Request, res: Response) {
 
     let screenshot
 
+    await delay(30000);
+
+
+
     for (let i = 0; i < time; i++) {
       setTimeout(async () => {
         screenshot = await video.screenshot({ type: "png" });
-      }, 300);
+
+        const file = new UTFile([screenshot], `vimeo-${videoId}-${i}.png`, {
+          customId: `vimeo-${videoId}-${i}`,
+        })
+
+        await utapi.uploadFiles(file)
+      }, 500);
     }
 
     // wait for 5 seconds and start to loop millieseconds
@@ -88,14 +112,10 @@ export async function GET(req: Request, res: Response) {
     );
   } finally {
     if (browser) {
-      await browser.close();
+      // await browser.close();
     }
   }
 
 }
 
 
-function uploadFile(file: string, id: number, index: number) {
-
-  const utapi = new UTApi();
-}
