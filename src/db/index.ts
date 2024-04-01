@@ -4,7 +4,13 @@ import postgres from 'postgres'
 import { env } from '@/lib/env'
 
 
-const connectionString = env.supa_db_url
+const connectionString = process.env.SUPABASE_DATABASE_URL
+
+console.log("connectionString", connectionString)
+
+if (!connectionString) {
+    throw new Error("No connection string provided")
+}
 
 // Disable prefetch as it is not supported for "Transaction" pool mode
 const client = postgres(connectionString, { prepare: false })

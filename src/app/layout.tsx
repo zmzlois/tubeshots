@@ -3,6 +3,7 @@ import { Inter as FontSans } from "next/font/google";
 import "./globals.css";
 import { cn } from "@/lib/utils";
 import { ClerkProvider } from "@clerk/nextjs";
+import { Toaster } from "@/components/ui/sonner";
 
 const fontSans = FontSans({
   subsets: ["latin"],
@@ -23,14 +24,12 @@ export default function RootLayout({
       <html lang="en">
         <body
           className={cn(
-            "min-h-screen bg-background font-sans antialised",
+            "h-screen bg-background content-center justify-center flex-col flex  font-sans antialised p-10",
             fontSans.variable
           )}
         >
-          <a href="/sign-in">Sign in</a>
-          <a href="/sign-up">Sign up</a>
-          <a href="/sign-out">Sign out</a>
           {children}
+          <Toaster />
         </body>
       </html>
     </ClerkProvider>
